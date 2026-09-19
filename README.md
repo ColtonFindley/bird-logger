@@ -3,13 +3,18 @@ Web app to log photographed birds. When a new bird is photographed, add a new en
 
 ## Tech
 Frontend: React
+
 Backend: Python - FastAPI
+
 Database: SQLite
 
 ## Database model
 birds table:
+
 id | species | common_name | date_spotted | notes | created_at | updated_at
+
 photos table:
+
 id | bird_id (foreign key to birds.id) | file_path | uploaded_at
 
 ## API endpoints
@@ -25,6 +30,7 @@ Photos:
 - Delete photo: DELETE /photos/{id}
 
 ## Structure
+```
 bird-logger/
     backend/
         main.py # FastAPI app and routes
@@ -41,5 +47,6 @@ bird-logger/
                 BirdList.jsx
             api.js # Fetch calls
         package.json
+```
 
 ## Setup
