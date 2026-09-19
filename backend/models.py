@@ -19,7 +19,7 @@ class Bird(Base):
     updated_at = Column(DateTime(timezone = True), onupdate=func.now())
 
     # corresponds a list of photo objects to a bird entry
-    photos = relationship("Photo", back_populated="bird", cascade="all, delete-orphan")
+    photos = relationship("Photo", back_populates="bird", cascade="all, delete-orphan")
 
 # id | bird_id | file_path | uploaded_at
 class Photo(Base):
