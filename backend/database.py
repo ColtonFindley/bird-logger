@@ -11,7 +11,7 @@ engine = create_engine(
 )
 
 # create a factory for session objects, turn autocommit and autoflush off
-Session = sessionmaker(autocommit = False, autoflush = False, bind=engine)
+SessionLocal = sessionmaker(autocommit = False, autoflush = False, bind=engine)
 
 # bridge Python classes and SQL tables
 # Python classes that inherit Base will be recognized as a mapped table
