@@ -1,12 +1,20 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
 from database import engine, get_db
 import models
 import schemas
 
+import os
+import shutil
+import uuid
+
 # create the tables defined in models
 models.Base.metadata.create_all(bind=engine)
+
+UPLOAD_DIR = "uploads" # folder where photos are saved
+# create photo file, won't raise error if it already exists
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app = FastAPI()
 
@@ -75,3 +83,57 @@ def delete_bird(bird_id: int, db: Session = Depends(get_db)):
     db.delete(bird)
     db.commit()
     return {"detail": "Bird deleted"}
+
+# allowed content types and extensions with photo uploads
+ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+
+@app.post("/birds/{bird_id}/photos", response_model = schemas.PhotoOut)
+# upload a photo to an existing bird entry
+# File(...) specifies a file is required with no default value
+def upload_photo(bird_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    # query database to find matching bird_id entry
+    bird = db.query(models.Bird).filter(models.Bird.id == bird_id).first()
+    # if queried bird_id does not exist in database
+    if not bird:
+        # raise 404 error
+        raise HTTPException(status_code=404, detail="Bird not found")
+    # make the full path of the inputted file
+    file_extension = os.path.splitext(file.filename)[1] # file extension of inputted file
+
+    # check if content type/extension if valid
+    if file.content_type not in ALLOWED_CONTENT_TYPES or file_extension not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Invalid file type. Allowed types: jpg, jpeg, png, webp, gif")
+
+    unique_filename = f"{uuid.uuid4()}{file_extension}" # generate unique filename
+    file_path = os.path.join(UPLOAD_DIR, unique_filename) # build full path
+
+    # open new file in wb mode
+    with open(file_path, "wb") as buffer:
+        # copy the uploaded file to the newly created file in the server, buffer
+        shutil.copyfileobj(file.file, buffer)
+    # create db row 
+    db_photo = models.Photo(bird_id = bird_id, file_path = file_path)
+    # add row to database
+    db.add(db_photo)
+    db.commit()
+    db.refresh(db_photo)
+    return db_photo
+
+@app.delete("/photos/{photo_id}")
+# delete a photo
+def delete_photo(photo_id: int, db: Session = Depends(get_db)):
+    # query database to find matching photo_id entry
+    photo = db.query(models.Photo).filter(models.Photo.id == photo_id).first()
+    # if queried photo_id does not exist in database
+    if not photo:
+        # raise 404 error
+        raise HTTPException(status_code=404, detail="Photo not found")
+    # check if photo exists on disk
+    if os.path.exists(photo.file_path):
+        # delete file from disk
+        os.remove(photo.file_path)
+    # remove photo from db
+    db.delete(photo)
+    db.commit()
+    return {"detail": "Photo deleted"}
