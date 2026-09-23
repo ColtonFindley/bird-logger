@@ -10,8 +10,8 @@ class Bird(Base):
     # primary key, indexed
     id = Column(Integer, primary_key = True, index= True)
     species = Column(String, nullable = False)
-    common_name = Column(String, nullable = True)
-    date_spotted = Column(String, nullable = False)
+    common_name = Column(String, nullable = False)
+    date_spotted = Column(String, nullable = True)
     notes = Column(String, nullable = True)
     # set to current time when row is created, db will fill this in 
     created_at = Column(DateTime(timezone = True), server_default = func.now())

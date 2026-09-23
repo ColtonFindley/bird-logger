@@ -19,7 +19,7 @@ class PhotoOut(BaseModel):
 class BirdCreate(BaseModel):
     # fields client must/can set
     species: str # required
-    common_name: Optional[str] = None
+    common_name: str
     date_spotted: Optional[datetime] = None
     notes: Optional[str] = None
     # server handles fields not defined here
@@ -37,7 +37,7 @@ class BirdOut(BaseModel):
     # validate all Bird fields
     id: int
     species: str
-    common_name: Optional[str]
+    common_name: str
     date_spotted: Optional[str]
     notes: Optional[str]
     created_at: datetime
