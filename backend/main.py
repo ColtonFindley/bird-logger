@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
 from database import engine, get_db
@@ -17,6 +18,8 @@ UPLOAD_DIR = "uploads" # folder where photos are saved
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app = FastAPI()
+# mount uploads folder as static
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 @app.get("/")
 def health_check():

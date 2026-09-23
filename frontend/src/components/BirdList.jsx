@@ -50,7 +50,19 @@ function BirdList() {
                         {` (${bird.species})`}
                         {bird.notes && <p>{bird.notes}</p>}
                         {bird.date_spotted && <p>{bird.date_spotted}</p>}
-                        <p>{bird.photos.length} photo(s)</p>
+                        {/* display photo(s) if there are any */}
+                        {bird.photos.length > 0 && (
+                            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                                {bird.photos.map((photo) => (
+                                <img
+                                    key={photo.id}
+                                    src={`/api/${photo.file_path}`}
+                                    alt={bird.species}
+                                    style={{ width: "100px", height: "100px", objectFit: "cover" }}
+                                />
+                                ))}
+                        </div>
+                        )}
                     </li>
                 ))}
             </ul>
