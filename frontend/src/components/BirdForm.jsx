@@ -77,18 +77,6 @@ function BirdForm({onBirdCreated}) {
 
             {/* show error if there is one */}
             {error && <p style={{color: "red"}}>{error}</p>}
-            {/* set bird species */}
-            <div>
-                <label>
-                    Species*:
-                    <input 
-                        type="text" 
-                        value={species}
-                        /* update state on every keystoke */
-                        onChange={(event) => setSpecies(event.target.value)}
-                    />
-                </label>
-            </div>
             {/* set bird common name */}
             <div>
                 <label>
@@ -98,6 +86,18 @@ function BirdForm({onBirdCreated}) {
                         value={commonName}
                         /* update state on every keystoke */
                         onChange={(event) => setCommonName(event.target.value)}
+                    />
+                </label>
+            </div>
+            {/* set bird species */}
+            <div>
+                <label>
+                    Species*:
+                    <input 
+                        type="text" 
+                        value={species}
+                        /* update state on every keystoke */
+                        onChange={(event) => setSpecies(event.target.value)}
                     />
                 </label>
             </div>

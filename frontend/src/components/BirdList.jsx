@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react"
-import { listBirds, deleteBird, uploadPhoto, deletePhoto } from "../api"
+import { listBirds, deleteBird, updateBird, uploadPhoto, deletePhoto } from "../api"
 
 // list all birds
 function BirdList() {
     const [birds, setBirds] = useState([]) // array of bird entries, updates on setBirds
     const [error, setError] = useState() // tracks errors
     const [loading, setLoading] = useState(true) // tracks if waiting, starts on true
+    // editing
+    const [editingId, setEditingId] = useState(null) // which bird is currently being edited
+    const [editForm, setEditForm] = useState({species: "", common_name: "", date_spotted: "", notes: ""}) // in-progress edited values
+    const [savingEdit, setSavingEdit] = useState(false) // 
 
     // load birds when component first renders, only once
     useEffect(() => {
@@ -85,9 +89,68 @@ function BirdList() {
         }
     }
 
+    // start editing process
+    function startEditing(bird) {
+        // put bird into editing mode
+        setEditingId(bird.id)
+        // pre-fill the edit form with bird's current values
+        setEditForm({
+            species: bird.species,
+            common_name: bird.common_name,
+            date_spotted: bird.date_spotted || "", // optional
+            notes: bird.notes || ""
+        })
+    }
+
+    // if client cancels editing - swap to display view
+    function cancelEditing() {
+        setEditingId(null)
+    }
+
+    // save client edits
+    async function saveEdit(birdId) {
+        // if both species and common name is not entered
+        if (!editForm.species.trim() && !editForm.common_name.trim()) {
+            setError("Species and common name are required.")
+            return
+        }
+
+        // if species is not entered
+        if (!editForm.species.trim()) {
+            setError("Species is required.")
+            return
+        }
+        // if common name is not entered
+        if (!editForm.common_name.trim()) {
+            setError("Common name is required.")
+            return
+        } 
+        // change saving edit state
+        setSavingEdit(true)
+        try {
+            // all API with updates information
+            const updated = await updateBird(birdId, {
+                species: editForm.species.trim(),
+                common_name: editForm.common_name.trim(),
+                date_spotted: editForm.date_spotted.trim() || null, // optional
+                notes: editForm.notes.trim() || null
+            })
+            // merge updated fields with matching bird
+            setBirds((prev) =>
+                prev.map((bird) => (bird.id === birdId ? { ...bird, ...updated}: bird))
+            )
+            // reset states
+            setEditingId(null)
+            setError(null)
+        } catch (err) {
+            setError(err.message)
+        } finally {
+            setSavingEdit(false)
+        }
+    }
+
     // display loading and error message
     if (loading) return <p>Loading birds...</p>
-    if (error) return <p>Error: {error}</p>
     // empty bird list edge case
     if (birds.length === 0) return <p>No birds logged yet.</p>
 
@@ -98,11 +161,80 @@ function BirdList() {
                 {/* loop through bird array */}
                 {birds.map((bird) => (
                     <li key={bird.id}>
-                        <strong>{bird.common_name}</strong>
-                        {/* only show notes and date spotted if they exist */}
-                        {` (${bird.species})`}
-                        {bird.notes && <p>{bird.notes}</p>}
-                        {bird.date_spotted && <p>{bird.date_spotted}</p>}
+                        {/* display editing mode */}
+                        {editingId === bird.id ? (
+                            <div>
+                                {/* if there is an error, display it above current bird */}
+                                {error && <p style={{ color: "red" }}>{error}</p>}
+                                <div>
+                                    {/* update common name */}
+                                    <label>
+                                        Common name:
+                                        <input
+                                            type="text"
+                                            value={editForm.common_name}
+                                            onChange={(e) =>
+                                                setEditForm((prev) => ({ ...prev, common_name: e.target.value }))
+                                            }
+                                        />
+                                    </label>
+                                </div>
+                                <div>
+                                    {/* update species */}
+                                    <label>
+                                        Species*:
+                                        <input
+                                            type="text"
+                                            value={editForm.species}
+                                            onChange={(e) =>
+                                                setEditForm((prev) => ({ ...prev, species: e.target.value }))
+                                            }
+                                        />
+                                    </label>
+                                </div>
+                                <div>
+                                    {/* update date spotted */}
+                                    <label>
+                                        Date spotted:
+                                        <input
+                                            type="date"
+                                            value={editForm.date_spotted}
+                                            onChange={(e) =>
+                                                setEditForm((prev) => ({ ...prev, date_spotted: e.target.value }))
+                                            }
+                                        />
+                                    </label>
+                                </div>
+                                <div>
+                                    {/* update notes */}
+                                    <label>
+                                        Notes:
+                                        <textarea
+                                            value={editForm.notes}
+                                            onChange={(e) =>
+                                                setEditForm((prev) => ({ ...prev, notes: e.target.value }))
+                                            }
+                                        />
+                                    </label>
+                                </div>
+                                <button onClick={() => saveEdit(bird.id)} disabled={savingEdit}>
+                                    {savingEdit ? "Saving..." : "Save"}
+                                </button>
+                                <button onClick={cancelEditing} disabled={savingEdit}>
+                                    Cancel
+                                </button>
+                            </div>
+                        ) : (
+                            <div>
+                                <strong>{bird.common_name}</strong>
+                                {/* only show notes and date spotted if they exist */}
+                                {` (${bird.species})`}
+                                {bird.notes && <p>{bird.notes}</p>}
+                                {bird.date_spotted && <p>{bird.date_spotted}</p>}
+                                <button onClick={() => startEditing(bird)}>Edit</button>
+                            </div>
+                        )}
+
                         {/* display photo(s) if there are any */}
                         {bird.photos.length > 0 && (
                             <div>
@@ -128,7 +260,7 @@ function BirdList() {
                                 />
                             </label>
                         </div>
-                        {/* delete photo button */}
+                        {/* delete entry button */}
                         <button onClick={() => handleDeleteBird(bird.id)}>
                             Delete Entry
                         </button>
