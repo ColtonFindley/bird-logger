@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { listBirds } from "../api"
+import { listBirds, deleteBird, uploadPhoto, deletePhoto } from "../api"
 
 // list all birds
 function BirdList() {
@@ -32,6 +32,59 @@ function BirdList() {
         }
     }
 
+    // handle deleting a bird entry
+    async function handleDeleteBird(birdId) {
+        // confirm if client wants to delete bird entry
+        if (!window.confirm("Delete this bird entry and all its photos?")) return
+        
+        try {
+            // call API
+            await deleteBird(birdId)
+            // update state by filtering out deleted bird
+            setBirds((prev) => prev.filter((b) => b.id !== birdId))
+        } catch (err) {
+            setError(err.message)
+        }
+    }
+
+    // handle adding a photo to a bird entry
+    async function handleAddPhoto(birdId, file) {
+        // guard against a null file
+        if (!file) return
+
+        try {
+            const newPhoto = await uploadPhoto(birdId, file) // upload and receive new photo object
+            // edit bird state
+            setBirds((prev) =>
+                // change bird list to include edited bird entry
+                prev.map((bird) =>
+                    // find matching bird, create new bird object with overriding photo array to include new photo
+                    bird.id === birdId ? { ...bird, photos: [...bird.photos, newPhoto]} : bird
+                )
+            )
+        } catch (err) {
+            setError(err.message)
+        }
+    }
+
+    // handle deleting a photo from a bird entry
+    async function handleDeletePhoto(birdId, photoId) {
+        try {
+            // call API
+            await deletePhoto(photoId)
+            // edit bird state
+            setBirds((prev) => 
+                // change bird list to include entry without the photo
+                prev.map((bird) =>
+                    // find matching birdId, return a new photo array filted out with that photo
+                    bird.id === birdId ? { ...bird, photos: bird.photos.filter((p) => p.id !== photoId)} : bird
+                )
+            )
+        } catch (err) {
+            setError(err.message)
+        }
+    }
+
     // display loading and error message
     if (loading) return <p>Loading birds...</p>
     if (error) return <p>Error: {error}</p>
@@ -52,17 +105,33 @@ function BirdList() {
                         {bird.date_spotted && <p>{bird.date_spotted}</p>}
                         {/* display photo(s) if there are any */}
                         {bird.photos.length > 0 && (
-                            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                            <div>
+                                {/* map and display all photos */}
                                 {bird.photos.map((photo) => (
-                                <img
-                                    key={photo.id}
-                                    src={`/api/${photo.file_path}`}
-                                    alt={bird.species}
-                                    style={{ width: "100px", height: "100px", objectFit: "cover" }}
-                                />
+                                    <div key={photo.id} style={{ display: "inline-block", marginRight: "8px" }}>
+                                        <img src={`/api/${photo.file_path}`} alt={bird.species} width={100} />
+                                        <button onClick={() => handleDeletePhoto(bird.id, photo.id)}>
+                                            Remove
+                                        </button>
+                                    </div>
                                 ))}
-                        </div>
+                            </div>
                         )}
+                        {/* add photo button */}
+                        <div>
+                            <label>
+                                Add photo:
+                                <input
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp,image/gif"
+                                    onChange={(e) => handleAddPhoto(bird.id, e.target.files[0])}
+                                />
+                            </label>
+                        </div>
+                        {/* delete photo button */}
+                        <button onClick={() => handleDeleteBird(bird.id)}>
+                            Delete Entry
+                        </button>
                     </li>
                 ))}
             </ul>
