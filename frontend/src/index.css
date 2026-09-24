@@ -1,12 +1,12 @@
-:root {
-    --bg: #f5f6f3;
-    --surface: #ffffff;
-    --text: #1f2a24;
-    --text-muted: #6b7770;
+:root { 
+    --bg: #272838;
+    --surface: #C0CAAD;
+    --text: #EDFFEC;
+    --text-muted: #30797e;
     --border: #e3e7e2;
 
-    --accent: #2f6f4f;
-    --accent-hover: #255a40;
+    --accent: #00A676;
+    --accent-hover: #00533b;
     --accent-soft: #e6f1ea;
     --accent-border: #c3dccd;
 
