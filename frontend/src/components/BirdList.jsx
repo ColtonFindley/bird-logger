@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react"
 import { listBirds, deleteBird, updateBird, uploadPhoto, deletePhoto } from "../api"
+import BirdCard from "./BirdCard"
+import "./BirdList.css"
 
 // list all birds
 function BirdList() {
@@ -155,120 +157,38 @@ function BirdList() {
     if (birds.length === 0) return <p>No birds logged yet.</p>
 
     return (
-        <div>
-            <h2>Logged Birds</h2>
-            <ul>
-                {/* loop through bird array */}
-                {birds.map((bird) => (
-                    <li key={bird.id}>
-                        {/* display editing mode */}
-                        {editingId === bird.id ? (
-                            <div>
-                                {/* if there is an error, display it above current bird */}
-                                {error && <p style={{ color: "red" }}>{error}</p>}
-                                <div>
-                                    {/* update common name */}
-                                    <label>
-                                        Common name:
-                                        <input
-                                            type="text"
-                                            value={editForm.common_name}
-                                            onChange={(e) =>
-                                                setEditForm((prev) => ({ ...prev, common_name: e.target.value }))
-                                            }
-                                        />
-                                    </label>
-                                </div>
-                                <div>
-                                    {/* update species */}
-                                    <label>
-                                        Species*:
-                                        <input
-                                            type="text"
-                                            value={editForm.species}
-                                            onChange={(e) =>
-                                                setEditForm((prev) => ({ ...prev, species: e.target.value }))
-                                            }
-                                        />
-                                    </label>
-                                </div>
-                                <div>
-                                    {/* update date spotted */}
-                                    <label>
-                                        Date spotted:
-                                        <input
-                                            type="date"
-                                            value={editForm.date_spotted}
-                                            onChange={(e) =>
-                                                setEditForm((prev) => ({ ...prev, date_spotted: e.target.value }))
-                                            }
-                                        />
-                                    </label>
-                                </div>
-                                <div>
-                                    {/* update notes */}
-                                    <label>
-                                        Notes:
-                                        <textarea
-                                            value={editForm.notes}
-                                            onChange={(e) =>
-                                                setEditForm((prev) => ({ ...prev, notes: e.target.value }))
-                                            }
-                                        />
-                                    </label>
-                                </div>
-                                <button onClick={() => saveEdit(bird.id)} disabled={savingEdit}>
-                                    {savingEdit ? "Saving..." : "Save"}
-                                </button>
-                                <button onClick={cancelEditing} disabled={savingEdit}>
-                                    Cancel
-                                </button>
-                            </div>
-                        ) : (
-                            <div>
-                                <strong>{bird.common_name}</strong>
-                                {/* only show notes and date spotted if they exist */}
-                                {` (${bird.species})`}
-                                {bird.notes && <p>{bird.notes}</p>}
-                                {bird.date_spotted && <p>{bird.date_spotted}</p>}
-                                <button onClick={() => startEditing(bird)}>Edit</button>
-                            </div>
-                        )}
-
-                        {/* display photo(s) if there are any */}
-                        {bird.photos.length > 0 && (
-                            <div>
-                                {/* map and display all photos */}
-                                {bird.photos.map((photo) => (
-                                    <div key={photo.id} style={{ display: "inline-block", marginRight: "8px" }}>
-                                        <img src={`/api/${photo.file_path}`} alt={bird.species} width={100} />
-                                        <button onClick={() => handleDeletePhoto(bird.id, photo.id)}>
-                                            Remove
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                        {/* add photo button */}
-                        <div>
-                            <label>
-                                Add photo:
-                                <input
-                                    type="file"
-                                    accept="image/jpeg,image/png,image/webp,image/gif"
-                                    onChange={(e) => handleAddPhoto(bird.id, e.target.files[0])}
-                                />
-                            </label>
-                        </div>
-                        {/* delete entry button */}
-                        <button onClick={() => handleDeleteBird(bird.id)}>
-                            Delete Entry
-                        </button>
-                    </li>
-                ))}
-            </ul>
-        </div>
-    )
+        <section className="bird-list">
+            <h2 className="bird-list__title">
+                Logged Birds <span className="bird-list__count">{birds.length}</span>
+            </h2>
+            {birds.length === 0 ? (
+                /* when there are no birds logged */
+                <p className="bird-list__empty">No birds logged yet.</p>
+            ) : (
+                /* when there are birds logged */
+                <ul className="bird-list__items">
+                    {/* loop through bird array */}
+                    {birds.map((bird) => (
+                        <BirdCard
+                            key={bird.id}
+                            bird={bird}
+                            isEditing={editingId === bird.id}
+                            editForm={editForm}
+                            setEditForm={setEditForm}
+                            error={error}
+                            savingEdit={savingEdit}
+                            startEditing={startEditing}
+                            saveEdit={saveEdit}
+                            cancelEditing={cancelEditing}
+                            handleAddPhoto={handleAddPhoto}
+                            handleDeletePhoto={handleDeletePhoto}
+                            handleDeleteBird={handleDeleteBird}
+                        />
+                    ))}
+                </ul>
+            )}
+        </section>
+    );
 }
 
 export default BirdList

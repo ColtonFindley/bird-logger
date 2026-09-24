@@ -1,0 +1,313 @@
+.bird-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.bird-card:hover,
+.bird-card.is-open {
+    box-shadow: var(--shadow-md);
+}
+.bird-card.is-open {
+    border-color: var(--accent-border);
+}
+
+/* ---------- header ---------- */
+.bird-card__header {
+    all: unset;
+    box-sizing: border-box;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+}
+.bird-card__header:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    border-radius: var(--radius);
+}
+.bird-card__header:hover .bird-card__name {
+    color: var(--accent);
+}
+
+.bird-card__title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+.bird-card__name {
+    font-size: 1.05rem;
+    font-weight: 650;
+    transition: color 0.15s ease;
+}
+.bird-card__species {
+    font-size: 0.875rem;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+.bird-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+.chip {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+.chip--accent {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+.bird-card__chevron {
+    color: var(--text-muted);
+    transition: transform 0.3s ease;
+}
+.bird-card.is-open .bird-card__chevron {
+    transform: rotate(180deg);
+}
+
+/* ---------- smooth expand / collapse ---------- */
+.bird-card__collapse {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s ease;
+}
+.bird-card.is-open .bird-card__collapse {
+    grid-template-rows: 1fr;
+}
+.bird-card__collapse-inner {
+    overflow: hidden;
+    min-height: 0;
+    visibility: hidden; /* keeps collapsed content out of tab order */
+    transition: visibility 0s linear 0.3s;
+}
+.bird-card.is-open .bird-card__collapse-inner {
+    visibility: visible;
+    transition-delay: 0s;
+}
+.bird-card__body {
+    padding: 0 1.25rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+}
+
+.bird-card__notes {
+    margin: 0;
+    line-height: 1.6;
+    color: var(--text);
+}
+.bird-card__empty {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+/* ---------- photos ---------- */
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.6rem;
+}
+.photo {
+    position: relative;
+    margin: 0;
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--bg);
+}
+.photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+}
+.photo:hover img {
+    transform: scale(1.05);
+}
+.photo__remove {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.4rem;
+    padding: 0.25rem 0.6rem;
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #fff;
+    background: rgba(20, 20, 20, 0.65);
+    backdrop-filter: blur(4px);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s ease, background 0.15s ease;
+}
+.photo:hover .photo__remove,
+.photo__remove:focus-visible {
+    opacity: 1;
+}
+.photo__remove:hover {
+    background: var(--danger);
+}
+@media (hover: none) {
+    .photo__remove {
+        opacity: 1; /* always visible on touch screens */
+    }
+}
+
+/* ---------- footer / actions ---------- */
+.bird-card__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+.bird-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.btn {
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 550;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+        transform 0.1s ease;
+}
+.btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+.btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+.btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+.btn--primary {
+    background: var(--accent);
+    color: #fff;
+}
+.btn--primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+.btn--soft {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+.btn--soft:hover {
+    background: var(--accent-border);
+}
+.btn--ghost {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--border);
+}
+.btn--ghost:hover:not(:disabled) {
+    background: var(--bg);
+}
+.btn--danger {
+    background: transparent;
+    color: var(--danger);
+}
+.btn--danger:hover {
+    background: var(--danger-soft);
+}
+
+/* hide the native file input; the label acts as the button */
+.file-btn {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+}
+.file-btn input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    font-size: 0;
+}
+.file-btn:focus-within {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* ---------- edit form ---------- */
+.bird-card__edit {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+.bird-card__error {
+    margin: 0;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.875rem;
+    color: var(--danger);
+    background: var(--danger-soft);
+    border-radius: var(--radius-sm);
+}
+.field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+}
+@media (max-width: 520px) {
+    .field-row {
+        grid-template-columns: 1fr;
+    }
+}
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+.field__label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+.field input,
+.field textarea {
+    font: inherit;
+    font-size: 0.925rem;
+    padding: 0.6rem 0.75rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.field textarea {
+    resize: vertical;
+}
+.field input:focus,
+.field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}

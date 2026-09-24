@@ -42,9 +42,15 @@ bird-logger/
     frontend/
         src/
             App.jsx # React app
+            App.css
+            main.jsx
+            index.css
             components/
                 BirdForm.jsx # Form to add a new bird entry
                 BirdList.jsx
+                BirdList.css
+                BirdCard.jsx
+                BirdCard.css
             api.js # Fetch calls
         package.json
 ```
