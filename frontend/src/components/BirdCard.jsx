@@ -4,7 +4,7 @@ import "./BirdCard.css"
 // Parse "YYYY-MM-DD" as a local date
 function formatDate(value) {
     if (!value) return null
-    const [y, m, d] = value.split("-").map(Number)
+    const [y, m, d] = String(value).slice(0, 10).split("-").map(Number);
     if (!y || !m || !d) return value
     return new Date(y, m - 1, d).toLocaleDateString(undefined, {
         year: "numeric",

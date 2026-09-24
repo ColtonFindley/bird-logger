@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { createBird, uploadPhoto } from "../api"
+import "./BirdForm.css"
 
 // form to create bird entry
 function BirdForm({onBirdCreated}) {
@@ -72,73 +73,87 @@ function BirdForm({onBirdCreated}) {
 
     return (
         // on submission call defined function
-        <form onSubmit={handleSubmit}>
-            <h2>Log a New Bird</h2>
+        <form className="bird-form" onSubmit={handleSubmit}>
+            <h2 className="bird-form__title">Log a New Bird</h2>
 
             {/* show error if there is one */}
-            {error && <p style={{color: "red"}}>{error}</p>}
-            {/* set bird common name */}
-            <div>
-                <label>
-                    Common name*:
-                    <input 
-                        type="text" 
+            {error && <p className="bird-form__error">{error}</p>}
+
+            <div className="bird-form__row">
+                {/* set bird common name */}
+                <label className="bird-form__field">
+                    <span className="bird-form__label">Common name*</span>
+                    <input
+                        type="text"
                         value={commonName}
-                        /* update state on every keystoke */
+                        /* update state on every keystroke */
                         onChange={(event) => setCommonName(event.target.value)}
                     />
                 </label>
-            </div>
-            {/* set bird species */}
-            <div>
-                <label>
-                    Species*:
-                    <input 
-                        type="text" 
+                {/* set bird species */}
+                <label className="bird-form__field">
+                    <span className="bird-form__label">Species*</span>
+                    <input
+                        type="text"
                         value={species}
-                        /* update state on every keystoke */
+                        /* update state on every keystroke */
                         onChange={(event) => setSpecies(event.target.value)}
                     />
                 </label>
             </div>
+
             {/* set date spotted */}
-            <div>
-                <label>
-                    Date spotted:
-                    <input 
-                        type="date" 
-                        value={dateSpotted}
-                        /* update state on every keystoke */
-                        onChange={(event) => setDateSpotted(event.target.value)}
-                    />
-                </label>
-            </div>
+            <label className="bird-form__field">
+                <span className="bird-form__label">Date spotted</span>
+                <input
+                    type="date"
+                    value={dateSpotted}
+                    /* update state on every keystroke */
+                    onChange={(event) => setDateSpotted(event.target.value)}
+                />
+            </label>
+
             {/* set optional notes */}
-            <div>
-                <label>
-                    Notes:
-                    <textarea 
-                        value={notes}
-                        /* update state on every keystoke */
-                        onChange={(event) => setNotes(event.target.value)}
-                    />
-                </label>
-            </div>
+            <label className="bird-form__field">
+                <span className="bird-form__label">Notes</span>
+                <textarea
+                    rows={3}
+                    value={notes}
+                    /* update state on every keystroke */
+                    onChange={(event) => setNotes(event.target.value)}
+                />
+            </label>
+
             {/* upload photo */}
-            <div>
-                <label>
-                    Photo:
-                    <input 
-                        type="file" 
-                        /* show which file types are accepted */
-                        accept="image/jpeg,image/png,image/webp,image/gif"
-                        /* update state on every keystoke */
-                        onChange={(event) => setPhotoFile(event.target.files[0])}
-                    />
-                </label>
-            </div>
+            <label className="bird-form__upload">
+                <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                <span className="bird-form__upload-text">
+                    {photoFile ? photoFile.name : "Choose a photo"}
+                </span>
+                <input
+                    type="file"
+                    /* show which file types are accepted */
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={(event) => setPhotoFile(event.target.files[0])}
+                />
+            </label>
+
             {/* submit button */}
-            <button type="submit" disabled={submitting}>
+            <button className="bird-form__submit" type="submit" disabled={submitting}>
                 {/* display different message after submitting */}
                 {submitting ? "Saving..." : "Add Bird"}
             </button>
