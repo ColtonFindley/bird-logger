@@ -102,7 +102,7 @@ def upload_photo(bird_id: int, file: UploadFile = File(...), db: Session = Depen
         # raise 404 error
         raise HTTPException(status_code=404, detail="Bird not found")
     # make the full path of the inputted file
-    file_extension = os.path.splitext(file.filename)[1] # file extension of inputted file
+    file_extension = os.path.splitext(file.filename)[1].lower() # file extension of inputted file
 
     # check if content type/extension if valid
     if file.content_type not in ALLOWED_CONTENT_TYPES or file_extension not in ALLOWED_EXTENSIONS:

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import "./BirdCard.css"
 
 // Parse "YYYY-MM-DD" as a local date
@@ -30,10 +30,21 @@ export default function BirdCard({
     const [open, setOpen] = useState(false) // open card state
     const expanded = open || isEditing // if card is expanded
     const photoCount = bird.photos.length // number of photos
+    const [lightboxPhoto, setLightboxPhoto] = useState(null) // currently enlarged photo
     const bodyId = `bird-body-${bird.id}`
 
     const updateField = (field) => (e) =>
-        setEditForm((prev) => ({ ...prev, [field]: e.target.value }));
+        setEditForm((prev) => ({ ...prev, [field]: e.target.value }))
+
+    // close the lightbox on Escape
+    useEffect(() => {
+        if (!lightboxPhoto) return
+        function onKeyDown(e) {
+            if (e.key === "Escape") setLightboxPhoto(null)
+        }
+        window.addEventListener("keydown", onKeyDown)
+        return () => window.removeEventListener("keydown", onKeyDown)
+    }, [lightboxPhoto])
 
     return (
         <li className={`bird-card ${expanded ? "is-open" : ""}`}>
@@ -152,11 +163,19 @@ export default function BirdCard({
                                 {/* map and display all photos */}
                                 {bird.photos.map((photo) => (
                                     <figure key={photo.id} className="photo">
-                                        <img
-                                            src={`/api/${photo.file_path}`}
-                                            alt={bird.species}
-                                            loading="lazy"
-                                        />
+                                        {/* clicking the photo enlarges it */}
+                                        <button
+                                            type="button"
+                                            className="photo__zoom"
+                                            onClick={() => setLightboxPhoto(photo)}
+                                            aria-label="Enlarge photo"
+                                        >
+                                            <img
+                                                src={`/api/${photo.file_path}`}
+                                                alt={bird.species}
+                                                loading="lazy"
+                                            />
+                                        </button>
                                         <button
                                             className="photo__remove"
                                             onClick={() => handleDeletePhoto(bird.id, photo.id)}
@@ -202,6 +221,31 @@ export default function BirdCard({
                     </div>
                 </div>
             </div>
+
+            {/* lightbox overlay, only rendered when a photo is selected */}
+            {lightboxPhoto && (
+                <div
+                    className="lightbox"
+                    onClick={() => setLightboxPhoto(null)}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={`Enlarged photo of ${bird.species}`}
+                >
+                    <button
+                        className="lightbox__close"
+                        onClick={() => setLightboxPhoto(null)}
+                        aria-label="Close"
+                    >
+                        x
+                    </button>
+                    <img
+                        src={`/api/${lightboxPhoto.file_path}`}
+                        alt={bird.species}
+                        className="lightbox__img"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                </div>
+            )}
         </li>
     );
 }

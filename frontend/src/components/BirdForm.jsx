@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { createBird, uploadPhoto } from "../api"
+import { createBird, uploadPhoto, deleteBird } from "../api"
 import "./BirdForm.css"
 
 // form to create bird entry
@@ -36,39 +36,59 @@ function BirdForm({onBirdCreated}) {
         } 
         // start submission - disable button and show message
         setSubmitting(true)
-        // try block to catch errors
+
+        // create the bird entry first
+        let newBird
         try {
-            // create new bird
-            const newBird = await createBird({
+            // call api function
+            newBird = await createBird({
                 species: species.trim(),
                 common_name: commonName.trim(),
                 date_spotted: dateSpotted || null, // optional
                 notes: notes.trim() || null
             })
-            
-            // upload photo only if user selected one
-            if (photoFile) {
-                await uploadPhoto(newBird.id, photoFile)
-            }
-
-            // clear form for next entry
-            setSpecies("")
-            setCommonName("")
-            setDateSpotted("")
-            setNotes("")
-            setPhotoFile(null)
-            // reset file input
-            event.target.reset()
-
-            // function passed in, will refresh bird list
-            onBirdCreated()
-        // if an error is thrown
         } catch (err) {
             setError(err.message)
-        // re-enable button
-        } finally {
             setSubmitting(false)
+            return
         }
+
+        // upload photo only if user selected one
+        if (photoFile) {
+            try {
+                // call api function
+                await uploadPhoto(newBird.id, photoFile)
+            } catch (photoErr) {
+                // photo upload failed, delete bird entry
+                try {
+                    // call api function
+                    await deleteBird(newBird.id)
+                } catch (cleanupErr) {
+                    // if bird cleanup fails
+                    setError(
+                        `Photo upload failed, and the entry could not be automatically removed. Please delete "${commonName}" manually.`
+                    )
+                    setSubmitting(false)
+                    return
+                }
+                setError(`Photo upload failed: ${photoErr.message}.`)
+                setSubmitting(false)
+                return
+            }
+        }
+
+        // clear form for next entry
+        setSpecies("")
+        setCommonName("")
+        setDateSpotted("")
+        setNotes("")
+        setPhotoFile(null)
+        // reset file input
+        event.target.reset()
+
+        // function passed in, will refresh bird list
+        onBirdCreated()
+        setSubmitting(false)
     }
 
     return (
@@ -148,7 +168,11 @@ function BirdForm({onBirdCreated}) {
                     type="file"
                     /* show which file types are accepted */
                     accept="image/jpeg,image/png,image/webp,image/gif"
-                    onChange={(event) => setPhotoFile(event.target.files[0])}
+                    onChange={(event) => {
+                        setPhotoFile(event.target.files[0])
+                        // allow re-selecting the same file after a failed attempt
+                        event.target.value = ""
+                    }}
                 />
             </label>
 
